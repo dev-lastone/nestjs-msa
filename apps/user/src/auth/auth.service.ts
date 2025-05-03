@@ -1,10 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register-dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../user/entity/user.entity';
+import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
 
   async register(rawToken: string, registerDto: RegisterDto) {
     const { email, password } = this.parseBasicToken(rawToken);
@@ -43,5 +55,62 @@ export class AuthService {
       email,
       password,
     };
+  }
+
+  async login(rawToken: string) {
+    const { email, password } = this.parseBasicToken(rawToken);
+
+    const user = await this.authenticate(email, password);
+
+    return {
+      refreshToken: await this.issueToken(user, true),
+      accessToken: await this.issueToken(user, false),
+    };
+  }
+
+  async authenticate(email: string, password: string) {
+    const user = await this.userRepo.findOne({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('이메일 또는 비밀번호가 잘못됐습니다!');
+    }
+
+    const isPasswordValid = password === user.password;
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('이메일 또는 비밀번호가 잘못됐습니다!');
+    }
+
+    return user;
+  }
+
+  async issueToken(user: any, isRefresh: boolean) {
+    const refreshTokenSecret =
+      this.configService.getOrThrow('JWT_REFRESH_SECRET');
+    const accessTokenSecret =
+      this.configService.getOrThrow('JWT_ACCESS_SECRET');
+
+    return this.jwtService.signAsync(
+      {
+        sub: user.id ?? user.sub,
+        role: user.role,
+        type: isRefresh ? 'refresh' : 'access',
+      },
+      {
+        secret: isRefresh ? refreshTokenSecret : accessTokenSecret,
+        expiresIn: isRefresh
+          ? this.configService.getOrThrow('JWT_REFRESH_EXPIRES_IN')
+          : this.configService.getOrThrow('JWT_ACCESS_EXPIRES_IN'),
+      },
+    );
   }
 }
