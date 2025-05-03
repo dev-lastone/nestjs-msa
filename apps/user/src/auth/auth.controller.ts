@@ -12,6 +12,6 @@ export class AuthController {
       throw new UnauthorizedException('Token is required');
     }
 
-    // return this.authService.register(token, registerDto);
+    return this.authService.register(token, registerDto);
   }
 }
