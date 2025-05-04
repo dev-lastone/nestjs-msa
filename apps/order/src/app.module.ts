@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { OrderModule } from './order/order.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -11,6 +12,12 @@ import { OrderModule } from './order/order.module';
         HTTP_PORT: Joi.number().required(),
         DB_URL: Joi.string().required(),
       }),
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.getOrThrow('DB_URL'),
+      }),
+      inject: [ConfigService],
     }),
     OrderModule,
   ],
