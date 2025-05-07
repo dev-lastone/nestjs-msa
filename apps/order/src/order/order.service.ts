@@ -9,6 +9,8 @@ export class OrderService {
   constructor(
     @Inject('USER_SERVICE')
     private readonly userService: ClientProxy,
+    @Inject('PRODUCT_SERVICE')
+    private readonly productService: ClientProxy,
   ) {}
 
   getHello(): string {
@@ -18,7 +20,7 @@ export class OrderService {
   async createOrder(createOrderDto: CreateOrderDto, token: string) {
     const user = await this.getUserFromToken(token);
 
-    console.log(user);
+    const products = await this.getProductsByIds(createOrderDto.productIds);
   }
 
   async getUserFromToken(token: string) {
@@ -40,5 +42,21 @@ export class OrderService {
     }
 
     return userRes.data;
+  }
+
+  async getProductsByIds(productIds: string[]) {
+    const res = await lastValueFrom(
+      this.productService.send({ cmd: 'get_products_info' }, { productIds }),
+    );
+
+    if (res.status === 'error') {
+      throw new PaymentCancelledException('상품 정보가 잘못되었습니다.');
+    }
+
+    return res.data.map((product) => ({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+    }));
   }
 }
