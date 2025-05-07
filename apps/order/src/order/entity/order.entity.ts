@@ -6,6 +6,7 @@ import {
 } from './delivery-address.entity';
 import { Product, ProductSchema } from './product.entity';
 import { Customer, CustomerSchema } from './customer.entity';
+import { Document } from 'mongoose';
 
 export enum OrderStatus {
   PENDING = 'pending',
