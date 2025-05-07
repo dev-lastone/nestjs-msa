@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Payment, PaymentStatus } from './entity/payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MakePaymentDto } from './dto/make-payment.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { NOTIFICATION_SERVICE } from '@app/common';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>,
+    @Inject(NOTIFICATION_SERVICE)
+    private readonly notificationService: ClientProxy,
   ) {}
 
   getHello(): string {
@@ -25,6 +30,8 @@ export class PaymentService {
 
       await this.updatePaymentStatus(paymentId, PaymentStatus.APPROVED);
 
+      this.sendNotification(payload.orderId, payload.userEmail);
+
       return this.paymentRepo.findOneBy({
         id: paymentId,
       });
@@ -32,6 +39,8 @@ export class PaymentService {
       if (paymentId) {
         await this.updatePaymentStatus(paymentId, PaymentStatus.REJECTED);
       }
+
+      throw e;
     }
   }
 
@@ -47,6 +56,18 @@ export class PaymentService {
       {
         paymentStatus: status,
       },
+    );
+  }
+
+  async sendNotification(orderId: string, to: string) {
+    await lastValueFrom(
+      this.notificationService.send(
+        { cmd: 'send_payment_notification' },
+        {
+          orderId,
+          to,
+        },
+      ),
     );
   }
 }
