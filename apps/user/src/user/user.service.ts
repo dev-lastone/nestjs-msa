@@ -36,4 +36,14 @@ export class UserService {
       },
     });
   }
+
+  async getUserById(userId: string) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new BadRequestException('유저를 찾을 수 없습니다!');
+    }
+
+    return user;
+  }
 }
