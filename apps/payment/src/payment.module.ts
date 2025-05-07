@@ -4,6 +4,7 @@ import { PaymentService } from './payment.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Payment } from './entity/payment.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([Payment]),
   ],
   controllers: [PaymentController],
   providers: [PaymentService],
