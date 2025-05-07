@@ -147,6 +147,8 @@ export class AuthService {
           throw new BadRequestException('Access 토큰을 입력해주세요!');
         }
       }
+
+      return payload;
     } catch (error) {
       throw new UnauthorizedException('토큰이 만료됐습니다!');
     }
