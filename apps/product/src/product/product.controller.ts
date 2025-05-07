@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -24,5 +25,10 @@ export class ProductController {
   @UseInterceptors(RpcInterceptor)
   getProductsInfo(@Payload() data: GetProductsInfoDto) {
     return this.productService.getProductsInfo(data.productIds);
+  }
+
+  @Post('create-samples')
+  async createSamples() {
+    await this.productService.createSamples();
   }
 }
