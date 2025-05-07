@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsEmpty,
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentDto } from './payment.dto';
 import { AddressDto } from './address.dto';
@@ -12,7 +6,7 @@ import { AddressDto } from './address.dto';
 export class CreateOrderDto {
   @IsArray()
   @IsString({ each: true })
-  @IsEmpty({ each: true })
+  @IsNotEmpty({ each: true })
   productIds: string[];
 
   @ValidateNested()
