@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Post,
   UnauthorizedException,
@@ -9,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register-dto';
-import { Authorization } from './decorator/authorization.decorator';
+import { Authorization } from '../../../gateway/src/auth/decorator/authorization.decorator';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ParseBearerTokenDto } from './dto/parse-bearer-token.dto';
 import { RpcInterceptor } from '@app/common/interceptor/rpc.interceptor';
@@ -18,18 +17,18 @@ import { RpcInterceptor } from '@app/common/interceptor/rpc.interceptor';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  @UsePipes(ValidationPipe)
-  registerUser(
-    @Authorization() token: string,
-    @Body() registerDto: RegisterDto,
-  ) {
-    if (token === null) {
-      throw new UnauthorizedException('Token is required');
-    }
-
-    return this.authService.register(token, registerDto);
-  }
+  // @Post('register')
+  // @UsePipes(ValidationPipe)
+  // registerUser(
+  //   @Authorization() token: string,
+  //   @Body() registerDto: RegisterDto,
+  // ) {
+  //   if (token === null) {
+  //     throw new UnauthorizedException('Token is required');
+  //   }
+  //
+  //   return this.authService.register(token, registerDto);
+  // }
 
   @Post('login')
   @UsePipes(ValidationPipe)
@@ -48,5 +47,18 @@ export class AuthController {
   @UseInterceptors(RpcInterceptor)
   parseBearerToken(@Payload() payload: ParseBearerTokenDto) {
     return this.authService.parseBearerToken(payload.token, false);
+  }
+
+  @MessagePattern({
+    cmd: 'register',
+  })
+  registerUser(@Payload() registerDto: RegisterDto) {
+    const token = registerDto.token;
+
+    if (token === null) {
+      throw new UnauthorizedException('Token is required');
+    }
+
+    return this.authService.register(token, registerDto);
   }
 }

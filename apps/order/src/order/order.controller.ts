@@ -8,7 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { Authorization } from '../../../user/src/auth/decorator/authorization.decorator';
+import { Authorization } from '../../../gateway/src/auth/decorator/authorization.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { RpcInterceptor } from '@app/common/interceptor/rpc.interceptor';
