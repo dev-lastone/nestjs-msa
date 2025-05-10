@@ -24,4 +24,17 @@ export class AuthService {
       ),
     );
   }
+
+  login(token: string) {
+    return lastValueFrom(
+      this.userMsa.send(
+        {
+          cmd: 'login',
+        },
+        {
+          token,
+        },
+      ),
+    );
+  }
 }
