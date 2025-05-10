@@ -18,4 +18,13 @@ export class AuthController {
 
     return this.authService.register(token, registerDto);
   }
+
+  @Post('login')
+  loginUser(@Authorization() token: string) {
+    if (token === null) {
+      throw new UnauthorizedException('Token is required');
+    }
+
+    return this.authService.login(token);
+  }
 }
