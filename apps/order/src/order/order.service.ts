@@ -32,9 +32,9 @@ export class OrderService {
   }
 
   async createOrder(createOrderDto: CreateOrderDto) {
-    const { productIds, payment, address, token } = createOrderDto;
+    const { productIds, payment, address, meta } = createOrderDto;
 
-    const user = await this.getUserFromToken(token);
+    const user = await this.getUserFromToken(meta.user.sub);
 
     const products = await this.getProductsByIds(productIds);
 
@@ -56,16 +56,7 @@ export class OrderService {
     return this.orderModel.findById(order._id);
   }
 
-  async getUserFromToken(token: string) {
-    const jwtRes = await lastValueFrom(
-      this.userService.send({ cmd: 'parse_bearer_token' }, { token }),
-    );
-
-    if (jwtRes.status === 'error') {
-      throw new PaymentCancelledException(jwtRes);
-    }
-
-    const userId = jwtRes.data.sub;
+  async getUserFromToken(userId: string) {
     const userRes = await lastValueFrom(
       this.userService.send({ cmd: 'get_user_info' }, { userId }),
     );

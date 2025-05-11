@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ClientProxy } from '@nestjs/microservices';
-import { ORDER_SERVICE } from '@app/common';
+import { ORDER_SERVICE, UserMeta, UserPayloadDto } from '@app/common';
 
 @Injectable()
 export class OrderService {
@@ -10,14 +10,19 @@ export class OrderService {
     private readonly orderMsa: ClientProxy,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto, token: string) {
-    return this.orderMsa.send(
+  async createOrder(
+    createOrderDto: CreateOrderDto,
+    userPayload: UserPayloadDto,
+  ) {
+    return this.orderMsa.send<any, CreateOrderDto & UserMeta>(
       {
         cmd: 'create_order',
       },
       {
         ...createOrderDto,
-        token,
+        meta: {
+          user: userPayload,
+        },
       },
     );
   }
