@@ -4,10 +4,6 @@ import { PaymentDto } from './payment.dto';
 import { AddressDto } from './address.dto';
 
 export class CreateOrderDto {
-  @IsString()
-  @IsNotEmpty()
-  token: string;
-
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
