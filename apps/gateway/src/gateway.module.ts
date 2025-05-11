@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { AuthModule } from './auth/auth.module';
@@ -7,6 +7,7 @@ import { ORDER_SERVICE, USER_SERVICE } from '@app/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { OrderModule } from './order/order.module';
+import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
 
 @Module({
   imports: [
@@ -58,4 +59,8 @@ import { OrderModule } from './order/order.module';
   controllers: [GatewayController],
   providers: [GatewayService],
 })
-export class GatewayModule {}
+export class GatewayModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BearerTokenMiddleware).forRoutes('order');
+  }
+}
