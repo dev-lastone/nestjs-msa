@@ -31,8 +31,8 @@ export class OrderService {
     return 'Hello World!';
   }
 
-  async createOrder(createOrderDto: CreateOrderDto, token: string) {
-    const { productIds, payment, address } = createOrderDto;
+  async createOrder(createOrderDto: CreateOrderDto) {
+    const { productIds, payment, address, token } = createOrderDto;
 
     const user = await this.getUserFromToken(token);
 
