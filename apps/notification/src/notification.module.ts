@@ -6,7 +6,8 @@ import * as Joi from 'joi';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Notification, NotificationSchema } from './entity/notification.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ORDER_SERVICE } from '@app/common';
+import { ORDER_SERVICE, OrderMicroservice } from '@app/common';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -14,8 +15,8 @@ import { ORDER_SERVICE } from '@app/common';
       isGlobal: true,
       validationSchema: Joi.object({
         DB_URL: Joi.string().required(),
-        ORDER_HOST: Joi.string().required(),
-        ORDER_TCP_PORT: Joi.number().required(),
+        GRPC_URL: Joi.string().required(),
+        ORDER_GRPC_URL: Joi.string().required(),
       }),
     }),
     MongooseModule.forRootAsync({
@@ -35,10 +36,11 @@ import { ORDER_SERVICE } from '@app/common';
         {
           name: ORDER_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.GRPC,
             options: {
-              host: configService.getOrThrow('ORDER_HOST'),
-              port: configService.getOrThrow('ORDER_TCP_PORT'),
+              package: OrderMicroservice.protobufPackage,
+              protoPath: join(process.cwd(), 'proto/order.proto'),
+              url: configService.getOrThrow('ORDER_GRPC_URL'),
             },
           }),
           inject: [ConfigService],

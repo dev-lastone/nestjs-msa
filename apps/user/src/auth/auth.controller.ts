@@ -1,19 +1,9 @@
-import {
-  Controller,
-  UnauthorizedException,
-  UseInterceptors,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register-dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ParseBearerTokenDto } from './dto/parse-bearer-token.dto';
-import { RpcInterceptor } from '@app/common/interceptor/rpc.interceptor';
-import { LoginDto } from './dto/login.dto';
+import { UserMicroservice } from '@app/common';
 
 @Controller('auth')
-export class AuthController {
+export class AuthController implements UserMicroservice.AuthServiceController {
   constructor(private readonly authService: AuthService) {}
 
   // @Post('register')
@@ -39,33 +29,22 @@ export class AuthController {
   //   return this.authService.login(token);
   // }
 
-  @MessagePattern({
-    cmd: 'parse_bearer_token',
-  })
-  @UsePipes(ValidationPipe)
-  @UseInterceptors(RpcInterceptor)
-  parseBearerToken(@Payload() payload: ParseBearerTokenDto) {
+  parseBearerToken(payload: UserMicroservice.ParseBearerTokenRequest) {
     return this.authService.parseBearerToken(payload.token, false);
   }
 
-  @MessagePattern({
-    cmd: 'register',
-  })
-  registerUser(@Payload() registerDto: RegisterDto) {
-    const token = registerDto.token;
+  registerUser(req: UserMicroservice.RegisterUserRequest) {
+    const token = req.token;
 
     if (token === null) {
       throw new UnauthorizedException('Token is required');
     }
 
-    return this.authService.register(token, registerDto);
+    return this.authService.register(token, req);
   }
 
-  @MessagePattern({
-    cmd: 'login',
-  })
-  loginUser(@Payload() loginDto: LoginDto) {
-    const token = loginDto.token;
+  loginUser(req: UserMicroservice.LoginUserRequest) {
+    const token = req.token;
 
     if (token === null) {
       throw new UnauthorizedException('Token is required');

@@ -1,18 +1,12 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UseInterceptors,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GetProductsInfoDto } from './dto/get-products-info.dto';
-import { RpcInterceptor } from '@app/common/interceptor/rpc.interceptor';
+import { ProductMicroservice } from '@app/common';
 
 @Controller('product')
-export class ProductController {
+export class ProductController
+  implements ProductMicroservice.ProductServiceController
+{
   constructor(private readonly productService: ProductService) {}
 
   @Get()
@@ -20,15 +14,19 @@ export class ProductController {
     return this.productService.getHello();
   }
 
-  @MessagePattern({ cmd: 'get_products_info' })
-  @UsePipes(ValidationPipe)
-  @UseInterceptors(RpcInterceptor)
-  getProductsInfo(@Payload() data: GetProductsInfoDto) {
-    return this.productService.getProductsInfo(data.productIds);
+  async getProductsInfo(req: GetProductsInfoDto) {
+    const res = await this.productService.getProductsInfo(req.productIds);
+
+    return {
+      products: res,
+    };
   }
 
-  @Post('create-samples')
   async createSamples() {
-    await this.productService.createSamples();
+    const res = await this.productService.createSamples();
+
+    return {
+      success: res,
+    };
   }
 }
