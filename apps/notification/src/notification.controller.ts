@@ -4,6 +4,7 @@ import { SendPaymentNotificationDto } from './dto/send-payment-notification.dto'
 import { NotificationMicroservice } from '@app/common';
 
 @Controller()
+@NotificationMicroservice.NotificationServiceControllerMethods()
 export class NotificationController
   implements NotificationMicroservice.NotificationServiceController
 {
