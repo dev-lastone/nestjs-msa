@@ -3,11 +3,17 @@ import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ORDER_SERVICE, USER_SERVICE } from '@app/common';
+import {
+  ORDER_SERVICE,
+  OrderMicroservice,
+  USER_SERVICE,
+  UserMicroservice,
+} from '@app/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { OrderModule } from './order/order.module';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,10 +21,8 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
       isGlobal: true,
       validationSchema: Joi.object({
         HTTP_PORT: Joi.number().required(),
-        USER_HOST: Joi.string().required(),
-        USER_TCP_PORT: Joi.number().required(),
-        ORDER_HOST: Joi.string().required(),
-        ORDER_TCP_PORT: Joi.number().required(),
+        USER_GRPC_URL: Joi.string().required(),
+        ORDER_GRPC_URL: Joi.string().required(),
       }),
     }),
     ClientsModule.registerAsync({
@@ -26,10 +30,11 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
         {
           name: USER_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.GRPC,
             options: {
-              host: configService.getOrThrow('USER_HOST'),
-              port: configService.getOrThrow('USER_TCP_PORT'),
+              package: UserMicroservice.protobufPackage,
+              protoPath: join(process.cwd(), 'proto/user.proto'),
+              url: configService.getOrThrow('USER_GRPC_URL'),
             },
           }),
           inject: [ConfigService],
@@ -42,10 +47,11 @@ import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware
         {
           name: ORDER_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.GRPC,
             options: {
-              host: configService.getOrThrow('ORDER_HOST'),
-              port: configService.getOrThrow('ORDER_TCP_PORT'),
+              package: OrderMicroservice.protobufPackage,
+              protoPath: join(process.cwd(), 'proto/order.proto'),
+              url: configService.getOrThrow('ORDER_GRPC_URL'),
             },
           }),
           inject: [ConfigService],
