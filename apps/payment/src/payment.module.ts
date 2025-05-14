@@ -6,7 +6,8 @@ import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Payment } from './entity/payment.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { NOTIFICATION_SERVICE } from '@app/common';
+import { NOTIFICATION_SERVICE, NotificationMicroservice } from '@app/common';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { NOTIFICATION_SERVICE } from '@app/common';
       validationSchema: Joi.object({
         HTTP_PORT: Joi.number().required(),
         DB_URL: Joi.string().required(),
-        NOTIFICATION_HOST: Joi.string().required(),
-        NOTIFICATION_TCP_PORT: Joi.number().required(),
+        GRPC_URL: Joi.string().required(),
+        NOTIFICATION_GRPC_URL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -33,10 +34,11 @@ import { NOTIFICATION_SERVICE } from '@app/common';
         {
           name: NOTIFICATION_SERVICE,
           useFactory: (configService: ConfigService) => ({
-            transport: Transport.TCP,
+            transport: Transport.GRPC,
             options: {
-              host: configService.getOrThrow('NOTIFICATION_HOST'),
-              port: configService.getOrThrow('NOTIFICATION_TCP_PORT'),
+              package: NotificationMicroservice.protobufPackage,
+              protoPath: join(process.cwd(), 'proto/notification.proto'),
+              url: configService.getOrThrow('NOTIFICATION_GRPC_URL'),
             },
           }),
           inject: [ConfigService],

@@ -57,5 +57,7 @@ export class ProductService {
     ];
 
     await this.productRepo.save(data);
+
+    return true;
   }
 }
