@@ -4,6 +4,7 @@ import { GetProductsInfoDto } from './dto/get-products-info.dto';
 import { ProductMicroservice } from '@app/common';
 
 @Controller('product')
+@ProductMicroservice.ProductServiceControllerMethods()
 export class ProductController
   implements ProductMicroservice.ProductServiceController
 {
