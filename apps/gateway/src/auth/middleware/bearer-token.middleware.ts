@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { NextFunction } from 'express';
 import { ClientGrpc } from '@nestjs/microservices';
-import { USER_SERVICE, UserMicroservice } from '@app/common';
+import { constructMetadata, USER_SERVICE, UserMicroservice } from '@app/common';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
@@ -46,9 +46,12 @@ export class BearerTokenMiddleware implements NestMiddleware, OnModuleInit {
 
   async verifyToken(token: string) {
     return await lastValueFrom(
-      this.authService.parseBearerToken({
-        token,
-      }),
+      this.authService.parseBearerToken(
+        {
+          token,
+        },
+        constructMetadata(BearerTokenMiddleware.name, 'verifyToken'),
+      ),
     );
   }
 }

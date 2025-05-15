@@ -11,6 +11,7 @@ import { Customer } from './entity/customer.entity';
 import { AddressDto } from './dto/address.dto';
 import { PaymentDto } from './dto/payment.dto';
 import {
+  constructMetadata,
   PAYMENT_SERVICE,
   PaymentMicroservice,
   PRODUCT_SERVICE,
@@ -20,6 +21,7 @@ import {
 } from '@app/common';
 import { PaymentFailedException } from '../exception/payment-failed.exception';
 import { PaymentStatus } from '../../../payment/src/entity/payment.entity';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class OrderService implements OnModuleInit {
@@ -34,7 +36,7 @@ export class OrderService implements OnModuleInit {
     private readonly productMicroservice: ClientGrpc,
     @Inject(PAYMENT_SERVICE)
     private readonly paymentMicroservice: ClientGrpc,
-    @InjectModel('Order')
+    @InjectModel(Order.name)
     private readonly orderModel: Model<Order>,
   ) {}
 
@@ -57,12 +59,12 @@ export class OrderService implements OnModuleInit {
     return 'Hello World!';
   }
 
-  async createOrder(createOrderDto: CreateOrderDto) {
+  async createOrder(createOrderDto: CreateOrderDto, metadata: Metadata) {
     const { productIds, payment, address, meta } = createOrderDto;
 
-    const user = await this.getUserFromToken(meta.user.sub);
+    const user = await this.getUserFromToken(meta.user.sub, metadata);
 
-    const products = await this.getProductsByIds(productIds);
+    const products = await this.getProductsByIds(productIds, metadata);
 
     const totalAmount = this.#calculateTotalAmount(products);
 
@@ -77,18 +79,34 @@ export class OrderService implements OnModuleInit {
       payment,
     );
 
-    await this.processPayment(order._id.toString(), payment, user.email);
+    await this.processPayment(
+      order._id.toString(),
+      payment,
+      user.email,
+      metadata,
+    );
 
     return this.orderModel.findById(order._id);
   }
 
-  async getUserFromToken(userId: string) {
-    return await lastValueFrom(this.userService.getUserInfo({ userId }));
+  async getUserFromToken(userId: string, metadata: Metadata) {
+    return await lastValueFrom(
+      this.userService.getUserInfo(
+        { userId },
+        constructMetadata(OrderService.name, 'getUserFromToken', metadata),
+      ),
+    );
   }
 
-  async getProductsByIds(productIds: string[]): Promise<Product[]> {
+  async getProductsByIds(
+    productIds: string[],
+    metadata: Metadata,
+  ): Promise<Product[]> {
     const res = await lastValueFrom(
-      this.productService.getProductsInfo({ productIds }),
+      this.productService.getProductsInfo(
+        { productIds },
+        constructMetadata(OrderService.name, 'getProductsByIds', metadata),
+      ),
     );
 
     return res.products.map((product) => ({
@@ -134,14 +152,18 @@ export class OrderService implements OnModuleInit {
     orderId: string,
     payment: PaymentDto,
     userEmail: string,
+    metadata: Metadata,
   ) {
     try {
       const res = await lastValueFrom(
-        this.paymentService.makePayment({
-          ...payment,
-          userEmail,
-          orderId,
-        }),
+        this.paymentService.makePayment(
+          {
+            ...payment,
+            userEmail,
+            orderId,
+          },
+          constructMetadata(OrderService.name, 'processPayment', metadata),
+        ),
       );
 
       const isPaid = res.paymentStatus === PaymentStatus.APPROVED;
