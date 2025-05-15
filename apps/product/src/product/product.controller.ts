@@ -1,10 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { GetProductsInfoDto } from './dto/get-products-info.dto';
 import { ProductMicroservice } from '@app/common';
+import { GrpcInterceptor } from '@app/common/interceptor';
 
 @Controller('product')
 @ProductMicroservice.ProductServiceControllerMethods()
+@UseInterceptors(GrpcInterceptor)
 export class ProductController
   implements ProductMicroservice.ProductServiceController
 {

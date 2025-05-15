@@ -14,6 +14,7 @@ import * as Joi from 'joi';
 import { OrderModule } from './order/order.module';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
 import { join } from 'path';
+import { traceInterceptor } from '@app/common/grpc/interceptor/trace.interceptor';
 
 @Module({
   imports: [
@@ -32,6 +33,9 @@ import { join } from 'path';
           useFactory: (configService: ConfigService) => ({
             transport: Transport.GRPC,
             options: {
+              channelOptions: {
+                interceptors: [traceInterceptor('gateway')],
+              },
               package: UserMicroservice.protobufPackage,
               protoPath: join(process.cwd(), 'proto/user.proto'),
               url: configService.getOrThrow('USER_GRPC_URL'),
@@ -49,6 +53,9 @@ import { join } from 'path';
           useFactory: (configService: ConfigService) => ({
             transport: Transport.GRPC,
             options: {
+              channelOptions: {
+                interceptors: [traceInterceptor('gateway')],
+              },
               package: OrderMicroservice.protobufPackage,
               protoPath: join(process.cwd(), 'proto/order.proto'),
               url: configService.getOrThrow('ORDER_GRPC_URL'),
