@@ -12,9 +12,14 @@ import {
 import { join } from 'path';
 import { PaymentEntity } from './adapter/output/typeorm/entity/payment.entity';
 import { PaymentService } from './application/payment.service';
-import { TypeormAdapter } from './adapter/output/typeorm/typeorm.adapter';
 import { GrpcAdapter } from './adapter/output/grpc/grpc.adapter';
 import { PortOneAdapter } from './adapter/output/portone/portone.adapter';
+import { MongooseModule } from '@nestjs/mongoose';
+import {
+  PaymentDocument,
+  PaymentSchema,
+} from './adapter/output/mongoose/document/payment.document';
+import { MongooseAdapter } from './adapter/output/mongoose/mongoose.adapter';
 
 @Module({
   imports: [
@@ -23,6 +28,7 @@ import { PortOneAdapter } from './adapter/output/portone/portone.adapter';
       validationSchema: Joi.object({
         HTTP_PORT: Joi.number().required(),
         DB_URL: Joi.string().required(),
+        MONGO_DB_URL: Joi.string().required(),
         GRPC_URL: Joi.string().required(),
         NOTIFICATION_GRPC_URL: Joi.string().required(),
       }),
@@ -33,6 +39,12 @@ import { PortOneAdapter } from './adapter/output/portone/portone.adapter';
         url: configService.getOrThrow('DB_URL'),
         autoLoadEntities: true,
         synchronize: true,
+      }),
+      inject: [ConfigService],
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.getOrThrow('MONGO_DB_URL'),
       }),
       inject: [ConfigService],
     }),
@@ -57,13 +69,19 @@ import { PortOneAdapter } from './adapter/output/portone/portone.adapter';
       isGlobal: true,
     }),
     TypeOrmModule.forFeature([PaymentEntity]),
+    MongooseModule.forFeature([
+      {
+        name: PaymentDocument.name,
+        schema: PaymentSchema,
+      },
+    ]),
   ],
   controllers: [PaymentController],
   providers: [
     PaymentService,
     {
       provide: 'DatabaseOutputPort',
-      useClass: TypeormAdapter,
+      useClass: MongooseAdapter,
     },
     {
       provide: 'NetworkOutputPort',
