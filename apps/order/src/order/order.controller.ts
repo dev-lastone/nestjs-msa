@@ -19,14 +19,6 @@ export class OrderController
     return this.orderService.getHello();
   }
 
-  // @Post()
-  // @UsePipes(ValidationPipe)
-  // async createOrder(
-  //   @Authorization() token: string,
-  //   @Body() createOrderDto: CreateOrderDto,
-  // ) {
-  //   return this.orderService.createOrder(createOrderDto, token);
-  // }
   async deliveryStarted(req: OrderMicroservice.DeliveryStartedRequest) {
     await this.orderService.changeOrderStatus(
       req.id,
