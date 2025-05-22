@@ -20,8 +20,8 @@ import {
   UserMicroservice,
 } from '@app/common';
 import { PaymentFailedException } from '../exception/payment-failed.exception';
-import { PaymentStatus } from '../../../payment/src/entity/payment.entity';
 import { Metadata } from '@grpc/grpc-js';
+import { PaymentStatus } from '../../../payment/src/domain/payment.domain';
 
 @Injectable()
 export class OrderService implements OnModuleInit {

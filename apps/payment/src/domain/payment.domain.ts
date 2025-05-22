@@ -13,11 +13,11 @@ export enum NotificationStatus {
   SENT = 'sent',
 }
 
-export class PaymentDomain {
+export class Payment {
   id: string;
   orderId: string;
-  status: PaymentStatus;
-  method: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
   cardNumber: string;
   expiryYear: string;
   expiryMonth: string;
@@ -29,7 +29,7 @@ export class PaymentDomain {
 
   constructor(params: {
     orderId: string;
-    method: PaymentMethod;
+    paymentMethod: PaymentMethod;
     cardNumber: string;
     expiryYear: string;
     expiryMonth: string;
@@ -38,11 +38,11 @@ export class PaymentDomain {
     amount: number;
     userEmail: string;
   }) {
-    this.status = PaymentStatus.PENDING;
+    this.paymentStatus = PaymentStatus.PENDING;
     this.notificationStatus = NotificationStatus.PENDING;
 
     this.orderId = params.orderId;
-    this.method = params.method;
+    this.paymentMethod = params.paymentMethod;
     this.cardNumber = params.cardNumber;
     this.expiryYear = params.expiryYear;
     this.expiryMonth = params.expiryMonth;
@@ -65,13 +65,13 @@ export class PaymentDomain {
   processPayment() {
     this.#validateId();
 
-    this.status = PaymentStatus.APPROVED;
+    this.paymentStatus = PaymentStatus.APPROVED;
   }
 
   rejectPayment() {
     this.#validateId();
 
-    this.status = PaymentStatus.REJECTED;
+    this.paymentStatus = PaymentStatus.REJECTED;
   }
 
   sendNotification() {
