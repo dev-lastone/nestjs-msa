@@ -1,5 +1,5 @@
-import { Order } from '../../../../domain/order.entity';
-import { PaymentDto } from '../../../../use-case/dto/create-order.dto';
+import { Order } from '../../../domain/order.entity';
+import { PaymentDto } from '../../../use-case/dto/create-order.dto';
 
 export class OrderMapper {
   constructor(private readonly order: Order) {}

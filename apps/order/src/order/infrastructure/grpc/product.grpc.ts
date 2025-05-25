@@ -1,10 +1,10 @@
 import { PRODUCT_SERVICE, ProductMicroservice } from '@app/common';
-import { ProductOutputPort } from '../../../port/output/product.output-port';
+import { ProductOutputPort } from '../../port/output/product.output-port';
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Product } from '../../../domain/product.entity';
+import { Product } from '../../domain/product.entity';
 import { lastValueFrom } from 'rxjs';
-import { GetProductsInfoResMapper } from '../mapper/get-products-info-res.mapper';
+import { GetProductsInfoResMapper } from '../framework/mapper/get-products-info-res.mapper';
 
 export class ProductGrpc implements ProductOutputPort, OnModuleInit {
   productClient: ProductMicroservice.ProductServiceClient;
