@@ -1,7 +1,7 @@
 import { PaymentMicroservice } from '@app/common';
-import { PaymentDto } from '../../../dto/payment.dto';
 import { Order } from '../../../domain/order.entity';
 import { PaymentMethod } from '../../../domain/payment.entity';
+import { PaymentDto } from '../../../use-case/dto/create-order.dto';
 
 export class MakePaymentResMapper {
   constructor(private readonly res: PaymentMicroservice.MakePaymentResponse) {}
