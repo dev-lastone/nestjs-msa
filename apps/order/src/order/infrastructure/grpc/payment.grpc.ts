@@ -1,4 +1,4 @@
-import { PaymentMicroservice } from '@app/common';
+import { PAYMENT_SERVICE, PaymentMicroservice } from '@app/common';
 import { PaymentOutputPort } from '../../port/output/payment.output-port';
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -14,7 +14,7 @@ export class PaymentGrpc implements PaymentOutputPort, OnModuleInit {
   paymentService: PaymentMicroservice.PaymentServiceClient;
 
   constructor(
-    @Inject()
+    @Inject(PAYMENT_SERVICE)
     private readonly paymentMicroservice: ClientGrpc,
   ) {}
 
