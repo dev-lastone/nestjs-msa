@@ -1,10 +1,10 @@
 import { USER_SERVICE, UserMicroservice } from '@app/common';
-import { UserOutputPort } from '../../../port/output/user.output-port';
+import { UserOutputPort } from '../../port/output/user.output-port';
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Customer } from '../../../domain/customer.entity';
+import { Customer } from '../../domain/customer.entity';
 import { lastValueFrom } from 'rxjs';
-import { GetUserInfoResMapper } from '../mapper/get-user-info-res.mapper';
+import { GetUserInfoResMapper } from '../framework/mapper/get-user-info-res.mapper';
 
 export class UserGrpc implements UserOutputPort, OnModuleInit {
   userClient: UserMicroservice.UserServiceClient;
