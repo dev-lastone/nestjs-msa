@@ -2,6 +2,12 @@ export enum PaymentMethod {
   CREDIT_CARD = 'credit_card',
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  REJECTED = 'rejected',
+  APPROVED = 'approved',
+}
+
 export class Payment {
   paymentId: string;
   paymentMethod: PaymentMethod;
