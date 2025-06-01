@@ -39,6 +39,11 @@ import { MongooseAdapter } from './adapter/output/mongoose/mongoose.adapter';
         url: configService.getOrThrow('DB_URL'),
         autoLoadEntities: true,
         synchronize: true,
+        ...(configService.get('NODE_ENV') === 'production' && {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        }),
       }),
       inject: [ConfigService],
     }),
