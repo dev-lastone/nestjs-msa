@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-notification-deployment
+  labels:
+    app: notification
+spec:
+  replicas: {{ .Values.notification.replicaCount }}
+  selector:
+    matchLabels:
+      app: notification
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification-container
+          image: akrtmwk/nestjs-notification:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config-map
+            - secretRef:
+                name: notification-secret
+          ports:
+            - containerPort: 3001
+          livenessProbe:
+            tcpSocket:
+              port: 3001
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 3001
+            periodSeconds: 5
