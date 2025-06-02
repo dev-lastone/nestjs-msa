@@ -1,0 +1,34 @@
+version: '3.1'
+
+services:
+  gateway:
+    image: akrtmwk/nestjs-gateway
+    env_file:
+      - ./apps/gateway/.env.prod
+    ports:
+      - '3000:3000'
+
+  user:
+    image: akrtmwk/nestjs-user
+    env_file:
+      - ./apps/user/.env.prod
+
+  product:
+    image: akrtmwk/nestjs-product
+    env_file:
+      - ./apps/product/.env.prod
+
+  order:
+    image: akrtmwk/nestjs-order
+    env_file:
+      - ./apps/order/.env.prod
+
+  payment:
+    image: akrtmwk/nestjs-payment
+    env_file:
+      - ./apps/payment/.env.prod
+
+  notification:
+    image: akrtmwk/nestjs-notification
+    env_file:
+      - ./apps/notification/.env.prod
