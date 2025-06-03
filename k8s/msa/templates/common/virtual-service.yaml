@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: msa-virtual-service
+  namespace: default
+spec:
+  hosts:
+    - '*'
+  gateways:
+    - msa-gateway
+  http:
+    - match:
+      - uri:
+          prefix: '/'
+      route:
+        - destination:
+            host: {{ .Chart.Name }}-gateway-node-port
+            port:
+              number: 3000
