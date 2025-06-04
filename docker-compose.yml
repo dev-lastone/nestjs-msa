@@ -104,21 +104,21 @@ services:
       timeout: 5s
       retries: 10
 
-  payment:
+  payment_command:
     build:
       context: .
-      dockerfile: ./apps/payment/Dockerfile
+      dockerfile: apps/payment-command/Dockerfile
     command: pnpm run start:dev payment
     depends_on:
       postgres_payment:
         condition: service_healthy
     env_file:
-      - ./apps/payment/.env
+      - apps/payment-command/.env
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
 
-  postgres_payment:
+  postgres_payment_command:
     image: postgres:16
     environment:
       POSTGRES_USER: postgres
@@ -134,7 +134,7 @@ services:
       timeout: 5s
       retries: 10
 
-  mongo_payment:
+  mongo_payment_command:
     image: mongo:8
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo

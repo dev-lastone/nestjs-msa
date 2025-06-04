@@ -9,12 +9,12 @@ COPY nest-cli.json nest-cli.json
 
 RUN npm i -g pnpm && pnpm i
 
-COPY apps/payment apps/payment
+COPY apps/payment-command apps/payment-command
 COPY libs libs
 
-RUN pnpm build payment
+RUN pnpm build payment-command
 
-CMD ["pnpm", "start:dev", "payment"]
+CMD ["pnpm", "start:dev", "payment-command"]
 
 FROM node:22-alpine AS production
 
@@ -31,4 +31,4 @@ RUN npm i -g pnpm && pnpm i
 COPY --from=development /usr/src/app/dist ./dist
 COPY proto proto
 
-CMD ["node", "dist/apps/payment/main"]
+CMD ["node", "dist/apps/payment-command/main"]

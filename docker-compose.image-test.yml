@@ -86,7 +86,7 @@ services:
       postgres_payment:
         condition: service_healthy
     env_file:
-      - ./apps/payment/.env
+      - apps/payment-command/.env
 
   postgres_payment:
     image: postgres:16
