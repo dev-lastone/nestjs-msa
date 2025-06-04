@@ -72,6 +72,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/gateway/tsconfig.app.json"
       }
+    },
+    "payment-query": {
+      "type": "application",
+      "root": "apps/payment-query",
+      "entryFile": "main",
+      "sourceRoot": "apps/payment-query/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/payment-query/tsconfig.app.json"
+      }
     }
   }
 }
