@@ -70,6 +70,17 @@ import { MongooseAdapter } from './adapter/output/mongoose/mongoose.adapter';
           }),
           inject: [ConfigService],
         },
+        {
+          name: 'KAFKA_SERVICE',
+          useFactory: () => ({
+            options: {
+              client: {
+                clientId: 'payment-command',
+                brokers: ['kafka:9092'],
+              },
+            },
+          }),
+        },
       ],
       isGlobal: true,
     }),
