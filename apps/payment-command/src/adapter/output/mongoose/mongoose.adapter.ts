@@ -18,13 +18,7 @@ export class MongooseAdapter implements DatabaseOutputPort {
   }
 
   async updatePayment(payment: Payment): Promise<Payment> {
-    const model = await this.paymentModel.findByIdAndUpdate(
-      payment.id,
-      payment,
-      {
-        new: true,
-      },
-    );
+    const model = await this.paymentModel.create(payment);
 
     return new PaymentDocumentMapper(model).toDomain();
   }
