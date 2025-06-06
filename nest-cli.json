@@ -41,7 +41,7 @@
       "type": "application",
       "root": "apps/payment-command",
       "entryFile": "main",
-      "sourceRoot": "apps/payment/src",
+      "sourceRoot": "apps/payment-command/src",
       "compilerOptions": {
         "tsConfigPath": "apps/payment-command/tsconfig.app.json"
       }
