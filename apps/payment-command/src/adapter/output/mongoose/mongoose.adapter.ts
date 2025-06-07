@@ -4,24 +4,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { PaymentDocument } from './document/payment.document';
 import { Model } from 'mongoose';
 import { PaymentDocumentMapper } from './mapper/payment-document.mapper';
-import { Inject, OnModuleInit } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 
-export class MongooseAdapter implements DatabaseOutputPort, OnModuleInit {
+export class MongooseAdapter implements DatabaseOutputPort {
   constructor(
     @InjectModel(PaymentDocument.name)
     private readonly paymentModel: Model<PaymentDocument>,
     @Inject('KAFKA_SERVICE')
     private readonly kafkaService: ClientKafka,
   ) {}
-
-  async onModuleDestroy() {
-    await this.kafkaService.close();
-  }
-
-  async onModuleInit() {
-    await this.kafkaService.connect();
-  }
 
   async savePayment(payment: Payment): Promise<Payment> {
     const model = await this.paymentModel.create(payment);
@@ -43,5 +35,13 @@ export class MongooseAdapter implements DatabaseOutputPort, OnModuleInit {
     );
 
     return new PaymentDocumentMapper(model).toDomain();
+  }
+
+  async findPaymentByOrderId(orderId: string): Promise<Payment> {
+    const result = await this.paymentModel.findOne({
+      orderId,
+    });
+
+    return new PaymentDocumentMapper(result).toDomain();
   }
 }

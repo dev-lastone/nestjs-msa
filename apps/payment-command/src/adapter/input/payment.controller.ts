@@ -3,6 +3,7 @@ import { PaymentMicroservice } from '@app/common';
 import { GrpcInterceptor } from '@app/common/interceptor';
 import { PaymentMethod } from '../../domain/payment.domain';
 import { PaymentService } from '../../application/payment.service';
+import { EventPattern } from '@nestjs/microservices';
 
 @Controller()
 @PaymentMicroservice.PaymentServiceControllerMethods()
@@ -17,5 +18,10 @@ export class PaymentController
       ...req,
       paymentMethod: req.paymentMethod as PaymentMethod,
     });
+  }
+
+  @EventPattern('order.notification.fail')
+  orderNotificationFail(orderId: string) {
+    return this.paymentService.cancelPayment(orderId);
   }
 }
