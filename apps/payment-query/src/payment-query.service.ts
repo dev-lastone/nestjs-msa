@@ -15,8 +15,8 @@ export class PaymentQueryService {
   }
 
   updateDocument(document: PaymentDocument) {
-    const { _id, ...rest } = document;
+    const { orderId, ...rest } = document;
 
-    return this.paymentRepo.findByIdAndUpdate(_id, rest);
+    return this.paymentRepo.findOneAndUpdate({ orderId }, rest);
   }
 }

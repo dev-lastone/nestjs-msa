@@ -25,6 +25,7 @@ export class PaymentDocumentMapper {
   toPaymentQueryMsaPayload() {
     return {
       _id: this.document._id,
+      orderId: this.document.orderId,
       userEmail: this.document.userEmail,
       amount: this.document.amount,
       paymentStatus: this.document.paymentStatus,
