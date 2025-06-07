@@ -10,6 +10,11 @@ enum PaymentStatus {
 @Schema()
 export class PaymentDocument extends Document<ObjectId> {
   @Prop({
+    required: true,
+  })
+  orderId: string;
+
+  @Prop({
     type: String,
     required: true,
     enum: PaymentStatus,
