@@ -52,6 +52,21 @@ import { join } from 'path';
           }),
           inject: [ConfigService],
         },
+        {
+          name: 'KAFKA_SERVICE',
+          useFactory: () => ({
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: 'notification',
+                brokers: ['kafka:9092'],
+              },
+              consumer: {
+                groupId: 'notification-consumer',
+              },
+            },
+          }),
+        },
       ],
       isGlobal: true,
     }),

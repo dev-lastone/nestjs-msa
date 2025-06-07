@@ -1,9 +1,14 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { SendPaymentNotificationDto } from './dto/send-payment-notification.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Notification, NotificationStatus } from './entity/notification.entity';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, ClientKafka } from '@nestjs/microservices';
 import {
   constructMetadata,
   ORDER_SERVICE,
@@ -12,7 +17,7 @@ import {
 import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
-export class NotificationService implements OnModuleInit {
+export class NotificationService implements OnModuleInit, OnModuleDestroy {
   orderService: OrderMicroservice.OrderServiceClient;
 
   constructor(
@@ -20,13 +25,21 @@ export class NotificationService implements OnModuleInit {
     private readonly notificationModel: Model<Notification>,
     @Inject(ORDER_SERVICE)
     private readonly orderMicroservice: ClientGrpc,
+    @Inject('KAFKA_SERVICE')
+    private readonly kafkaService: ClientKafka,
   ) {}
 
-  onModuleInit() {
+  async onModuleDestroy() {
+    await this.kafkaService.close();
+  }
+
+  async onModuleInit() {
     this.orderService =
       this.orderMicroservice.getService<OrderMicroservice.OrderServiceClient>(
         'OrderService',
       );
+
+    await this.kafkaService.connect();
   }
 
   getHello(): string {
@@ -39,16 +52,22 @@ export class NotificationService implements OnModuleInit {
   ) {
     const notification = await this.createNotification(dto);
 
-    await this.sendEmail();
+    try {
+      await this.sendEmail();
 
-    await this.updateNotificationStatus(
-      notification._id.toString(),
-      NotificationStatus.SENT,
-    );
+      await this.updateNotificationStatus(
+        notification._id.toString(),
+        NotificationStatus.SENT,
+      );
 
-    this.sendDeliveryStartedMessage(dto.orderId, metadata);
+      this.sendDeliveryStartedMessage(dto.orderId, metadata);
 
-    return this.notificationModel.findById(notification._id);
+      return this.notificationModel.findById(notification._id);
+    } catch (e) {
+      this.kafkaService.emit('order.notification.fail', dto.orderId);
+
+      return this.notificationModel.findById(notification._id);
+    }
   }
 
   sendDeliveryStartedMessage(id: string, metadata: Metadata) {

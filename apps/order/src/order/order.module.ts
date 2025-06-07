@@ -11,6 +11,7 @@ import { OrderRepo } from './infrastructure/mongoose/repository/order.repo';
 import { PaymentGrpc } from './infrastructure/grpc/payment.grpc';
 import { UserGrpc } from './infrastructure/grpc/user.grpc';
 import { ProductGrpc } from './infrastructure/grpc/product.grpc';
+import { CancelOrderUseCase } from './use-case/cancel-order.use-case';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductGrpc } from './infrastructure/grpc/product.grpc';
   providers: [
     CreateOrderUseCase,
     StartDeliveryUseCase,
+    CancelOrderUseCase,
     {
       provide: 'OrderOutputPort',
       useClass: OrderRepo,
